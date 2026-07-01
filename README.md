@@ -60,4 +60,4 @@ $ ./fixture-bank mcp --db-url "$DATABASE_URL" --store-dir ./fixtures
 
 ## License
 
-MIT (planned)
+MIT — see [LICENSE](LICENSE)

@@ -9,7 +9,7 @@
 - [x] プロジェクトスキャフォールディング（`cmd/fixture-bank`, `internal/*`, cobra CLI）
 - [x] テストフレームワークのセットアップ（標準`testing`）
 - [ ] CI設定（lint/test/buildの自動実行）
-- [ ] LICENSE確定（MIT想定。DESIGN.md 6. 未決事項）
+- [x] LICENSE確定（MIT。`LICENSE`ファイルを追加）
 
 ## Phase 1: DSLコア（v0.1相当） ✅
 
