@@ -23,7 +23,7 @@
 - 🧩 **前提データ構築が試験対象を汚染する**: 初期化処理と計測対象の処理が同じ経路を通ると正確な計測ができない
 - 🕳️ **カバレッジが上がらない**: 常に新規ユーザー相当の状態からシナリオが始まりがちで、蓄積されたデータ状態(aged state)の検証が漏れる
 
-`fixture-bank` は、前提データの生成ロジックをDSLとして切り出し、資産化することでこれらに応える。詳しい設計は [DESIGN.md](./docs/DESIGN.md)、MCPツールのI/Fは [MCP_TOOLS.md](./MCP_TOOLS.md) を参照。
+`fixture-bank` は、前提データの生成ロジックをDSLとして切り出し、資産化することでこれらに応える。詳しい設計は [DESIGN.md](./docs/DESIGN.md)、MCPツールのI/Fは [MCP_TOOLS.md](./docs/MCP_TOOLS.md) を参照。
 
 ## クイックイメージ
 
@@ -37,7 +37,7 @@ $ fixture-bank materialize --fixture user:level50:has_premium_pass --count 3 --f
 
 ## 現在のステータス
 
-🚧 **実装フェーズ**。Go実装でDSLパーサー・generator一式・`materialize`(SQL/JSON出力)・Fixtureの保存/タグ管理・PostgreSQL連携(`pool_ref`/`unique: db`)まで実装済み。MCPサーバー化は未着手です。詳細は[TODO.md](./TODO.md)を参照。
+🚧 **実装フェーズ**。Go実装でDSLパーサー・generator一式・`materialize`(SQL/JSON出力)・Fixtureの保存/タグ管理・PostgreSQL連携(`pool_ref`/`unique: db`)・MCPサーバー(`introspect_schema`/`draft_dsl`/`materialize`/`save_fixture`)まで実装済みです。詳細は[TODO.md](./TODO.md)を参照。
 
 ## ビルド・実行
 
@@ -53,6 +53,9 @@ $ ./fixture-bank materialize --dsl fixture.yaml --count 1000 --format sql --db-u
 # Fixtureをタグ付きで保存し、タグから生成
 $ ./fixture-bank fixture save --dsl fixture.yaml --tag user:level50:has_premium_pass
 $ ./fixture-bank materialize --fixture user:level50:has_premium_pass --count 500 --format sql
+
+# MCPサーバーとして起動(stdio)。ツールI/Fは docs/MCP_TOOLS.md を参照
+$ ./fixture-bank mcp --db-url "$DATABASE_URL" --store-dir ./fixtures
 ```
 
 ## ライセンス

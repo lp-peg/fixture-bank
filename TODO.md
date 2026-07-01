@@ -50,16 +50,18 @@
 - [x] タグ形式でのFixture指定（例: `user:level50:has_premium_pass`）の解決ロジック
 - [x] Fixture一覧・検索コマンド（`fixture-bank fixture save|list`）
 
-## Phase 4: MCPサーバー化（v0.2相当）
+## Phase 4: MCPサーバー化（v0.2相当） ✅
 
-- [ ] `MCP_TOOLS.md` の新規作成（README/DESIGN.mdから参照されているが未作成。ツールI/Fの確定）
-- [ ] `introspect_schema`: 対象DBのスキーマ調査ツール
-- [ ] `draft_dsl`: DSL草案生成 + 3段階検証の実装
-  - [ ] 構文検証
-  - [ ] スキーマ整合検証（`introspect_schema`結果との照合）
-  - [ ] DB実行検証（サンドボックスDBへの少数件試行適用、unique/FK/CHECK制約違反の検出）
-- [ ] `materialize`: MCP経由での呼び出し
-- [ ] `save_fixture`: 生成DSLの保存
+- [x] `MCP_TOOLS.md` の新規作成 — `docs/MCP_TOOLS.md`
+- [x] `introspect_schema`: 対象DBのスキーマ調査ツール — `internal/mcpserver/introspect.go`（`internal/pgdb/schema.go`でPK/UNIQUE/FK込みのテーブル/カラム調査を実装）
+- [x] `draft_dsl`: DSL草案生成 + 3段階検証の実装 — `internal/mcpserver/draft.go`
+  - [x] 構文検証
+  - [x] スキーマ整合検証（`introspect_schema`結果との照合）
+  - [x] DB実行検証（トランザクション内で少数件試行適用 + 必ずROLLBACK、unique/FK/CHECK制約違反の検出）— `internal/pgdb/sandbox.go`
+- [x] `materialize`: MCP経由での呼び出し — `internal/mcpserver/materialize.go`
+- [x] `save_fixture`: 生成DSLの保存 — `internal/mcpserver/fixture.go`
+- [x] `fixture-bank mcp` CLIサブコマンド（stdio transport、`--db-url`/`--store-dir`）— `cmd/fixture-bank/mcp.go`
+- [x] Go SDK採用: `github.com/modelcontextprotocol/go-sdk`
 
 ## Phase 5: テスト・ドキュメント整備
 
@@ -68,6 +70,7 @@
 - [x] `unique`（batch/db）のユニットテスト
 - [x] `pool_ref`（空プール含む）のユニットテスト
 - [x] PostgreSQLを用いた統合テスト — `internal/pgdb/pgdb_test.go`（`FIXTURE_BANK_TEST_DATABASE_URL`未設定時はskip。testcontainers導入は今後の検討課題）
+- [x] MCPツール(introspect_schema/draft_dsl/materialize/save_fixture)のテスト — `internal/mcpserver/mcpserver_test.go`（in-memory transportで各ツールを呼び出し、DB系はskip対応）
 - [x] README.mdの「現在のステータス」更新（設計フェーズ → 実装フェーズ）
 
 ## Phase 6: 未決事項の解消（DESIGN.md 6.）
