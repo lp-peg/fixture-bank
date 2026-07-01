@@ -18,6 +18,7 @@ func main() {
 	}
 	root.AddCommand(newMaterializeCmd())
 	root.AddCommand(newFixtureCmd())
+	root.AddCommand(newMCPCmd())
 
 	if err := root.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error:", err)
