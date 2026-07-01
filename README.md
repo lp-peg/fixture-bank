@@ -37,7 +37,23 @@ $ fixture-bank materialize --fixture user:level50:has_premium_pass --count 3 --f
 
 ## 現在のステータス
 
-🚧 **設計フェーズ**。DSL仕様とMCPツールI/Fを固めている段階です。
+🚧 **実装フェーズ**。Go実装でDSLパーサー・generator一式・`materialize`(SQL/JSON出力)・Fixtureの保存/タグ管理・PostgreSQL連携(`pool_ref`/`unique: db`)まで実装済み。MCPサーバー化は未着手です。詳細は[TODO.md](./TODO.md)を参照。
+
+## ビルド・実行
+
+```bash
+$ go build -o fixture-bank ./cmd/fixture-bank
+
+# DSLファイルからJSON生成
+$ ./fixture-bank materialize --dsl fixture.yaml --count 3 --format json
+
+# SQL(INSERT文)として生成
+$ ./fixture-bank materialize --dsl fixture.yaml --count 1000 --format sql --db-url "$DATABASE_URL"
+
+# Fixtureをタグ付きで保存し、タグから生成
+$ ./fixture-bank fixture save --dsl fixture.yaml --tag user:level50:has_premium_pass
+$ ./fixture-bank materialize --fixture user:level50:has_premium_pass --count 500 --format sql
+```
 
 ## ライセンス
 

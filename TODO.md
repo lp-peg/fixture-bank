@@ -3,52 +3,52 @@
 現状、このリポジトリは設計ドキュメント（[DESIGN.md](./docs/DESIGN.md), [DSL_SPEC.md](./docs/DSL_SPEC.md)）のみが存在し、実装コードは未着手。
 [DESIGN.md](./docs/DESIGN.md) の「5. MVPスコープ」「7. ロードマップ」に基づき、機能完成までのタスクをフェーズ分割する。
 
-## Phase 0: プロジェクト基盤
+## Phase 0: プロジェクト基盤 ✅
 
-- [ ] 実装言語・ランタイムの選定（CLIとMCPサーバーを両立しやすい構成を検討。例: Node.js + TypeScript）
-- [ ] プロジェクトスキャフォールディング（パッケージ管理、ディレクトリ構成、lint/format設定）
-- [ ] テストフレームワークのセットアップ
+- [x] 実装言語・ランタイムの選定 → **Go 1.25**
+- [x] プロジェクトスキャフォールディング（`cmd/fixture-bank`, `internal/*`, cobra CLI）
+- [x] テストフレームワークのセットアップ（標準`testing`）
 - [ ] CI設定（lint/test/buildの自動実行）
 - [ ] LICENSE確定（MIT想定。DESIGN.md 6. 未決事項）
 
-## Phase 1: DSLコア（v0.1相当）
+## Phase 1: DSLコア（v0.1相当） ✅
 
-- [ ] DSLのトップレベル構造の型定義（`entity`, `count`, `seed`, `fields`, `relations`）
-- [ ] YAMLパーサーの実装
-- [ ] 構文検証（`type`/`generator`の組み合わせが定義済みか）
-- [ ] generator実装
-  - [ ] `fixed`
-  - [ ] `random_int` / `random_float`
-  - [ ] `sample`
-  - [ ] `sequence`
-  - [ ] `faker`（name, email等の主要providerから着手）
-  - [ ] `uuid_v4`
-  - [ ] `ref`（`parent.<field>` の解決）
-  - [ ] `pool_ref`（DBクエリ結果のプールキャッシュ、空プール時 `error_type: empty_pool`）
-- [ ] `unique` 制約の実装
-  - [ ] `none`（デフォルト、何もしない）
-  - [ ] `batch`（バッチ内一意性の保証）
-  - [ ] `db`（DB存在チェック + 既定10回リトライ、失敗時 `error_type: unique_retry_exhausted`）
-- [ ] `relations` の多階層生成エンジン
-  - [ ] トポロジカル順（親→子）での生成制御
-  - [ ] `count_per_parent`（`{fixed: N}` / `{min, max}`）の実装
-  - [ ] `ref: parent.<field>` の直上親限定の解決規則
-- [ ] 統一エラーモデル（`error_type` を伴うエラー返却）の実装
+- [x] DSLのトップレベル構造の型定義（`entity`, `count`, `seed`, `fields`, `relations`）— `internal/dsl/types.go`
+- [x] YAMLパーサーの実装 — `internal/dsl/parse.go`
+- [x] 構文検証（`type`/`generator`の組み合わせが定義済みか）
+- [x] generator実装 — `internal/generator/*`
+  - [x] `fixed`
+  - [x] `random_int` / `random_float`
+  - [x] `sample`
+  - [x] `sequence`
+  - [x] `faker`（email, name, first_name, last_name, username, phone, address, company, word, sentence, url）
+  - [x] `uuid_v4`
+  - [x] `ref`（`parent.<field>` の解決）
+  - [x] `pool_ref`（DBクエリ結果のプールキャッシュ、空プール時 `error_type: empty_pool`）
+- [x] `unique` 制約の実装 — `internal/generator/unique.go`
+  - [x] `none`（デフォルト、何もしない）
+  - [x] `batch`（バッチ内一意性の保証）
+  - [x] `db`（DB存在チェック + 既定10回リトライ、失敗時 `error_type: unique_retry_exhausted`）
+- [x] `relations` の多階層生成エンジン — `internal/materialize/engine.go`
+  - [x] トポロジカル順（親→子）での生成制御
+  - [x] `count_per_parent`（`{fixed: N}` / `{min, max}`）の実装
+  - [x] `ref: parent.<field>` の直上親限定の解決規則
+- [x] 統一エラーモデル（`error_type` を伴うエラー返却）の実装 — `internal/ferr`
 
-## Phase 2: `materialize` コマンド
+## Phase 2: `materialize` コマンド ✅
 
-- [ ] CLIエントリポイントの実装（`fixture-bank materialize`）
-- [ ] オプション: `--dsl`, `--fixture`, `--count`, `--format sql|json`
-- [ ] `--count` によるルートエンティティ件数の上書きロジック（子は`count_per_parent`で自動スケール）
-- [ ] JSON出力の実装
-- [ ] SQL出力の実装（PostgreSQL向けINSERT文生成）
-- [ ] PostgreSQL接続設定（`pool_ref` / `unique: db` のクエリ発行用）
+- [x] CLIエントリポイントの実装（`fixture-bank materialize`）
+- [x] オプション: `--dsl`, `--fixture`, `--count`, `--seed`, `--format sql|json`, `--out`, `--db-url`
+- [x] `--count` によるルートエンティティ件数の上書きロジック（子は`count_per_parent`で自動スケール）
+- [x] JSON出力の実装 — `internal/output/json.go`（DSL宣言順を保持）
+- [x] SQL出力の実装（PostgreSQL向けINSERT文生成）— `internal/output/sql.go`
+- [x] PostgreSQL接続設定（`pool_ref` / `unique: db` のクエリ発行用）— `internal/pgdb`
 
-## Phase 3: Fixtureの保存・タグ管理
+## Phase 3: Fixtureの保存・タグ管理 ✅
 
-- [ ] ローカルファイルベースの保存形式の設計（保存先ディレクトリ構成、メタデータ形式）
-- [ ] タグ形式でのFixture指定（例: `user:level50:has_premium_pass`）の解決ロジック
-- [ ] Fixture一覧・検索コマンド
+- [x] ローカルファイルベースの保存形式の設計 — `internal/fixturestore`（タグ名 = 相対パス、`.yaml`保存）
+- [x] タグ形式でのFixture指定（例: `user:level50:has_premium_pass`）の解決ロジック
+- [x] Fixture一覧・検索コマンド（`fixture-bank fixture save|list`）
 
 ## Phase 4: MCPサーバー化（v0.2相当）
 
@@ -63,12 +63,12 @@
 
 ## Phase 5: テスト・ドキュメント整備
 
-- [ ] 各generatorのユニットテスト
-- [ ] `relations`（多階層・count_per_parent）のユニットテスト
-- [ ] `unique`（batch/db）のユニットテスト
-- [ ] `pool_ref`（空プール含む）のユニットテスト
-- [ ] PostgreSQLを用いた統合テスト（testcontainers等でのサンドボックス検証）
-- [ ] README.mdの「現在のステータス」更新（設計フェーズ → 実装状況に応じて更新）
+- [x] 各generatorのユニットテスト — `internal/generator/generator_test.go`
+- [x] `relations`（多階層・count_per_parent）のユニットテスト — `internal/materialize/engine_test.go`
+- [x] `unique`（batch/db）のユニットテスト
+- [x] `pool_ref`（空プール含む）のユニットテスト
+- [x] PostgreSQLを用いた統合テスト — `internal/pgdb/pgdb_test.go`（`FIXTURE_BANK_TEST_DATABASE_URL`未設定時はskip。testcontainers導入は今後の検討課題）
+- [x] README.mdの「現在のステータス」更新（設計フェーズ → 実装フェーズ）
 
 ## Phase 6: 未決事項の解消（DESIGN.md 6.）
 
