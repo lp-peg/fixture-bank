@@ -8,7 +8,7 @@
 - [x] 実装言語・ランタイムの選定 → **Go 1.25**
 - [x] プロジェクトスキャフォールディング（`cmd/fixture-bank`, `internal/*`, cobra CLI）
 - [x] テストフレームワークのセットアップ（標準`testing`）
-- [ ] CI設定（lint/test/buildの自動実行）
+- [x] CI設定（lint/test/buildの自動実行）— `.github/workflows/ci.yml`（PostgreSQLサービス込みで`go build`/`go vet`/`gofmt`/`go test`を実行）
 - [x] LICENSE確定（MIT。`LICENSE`ファイルを追加）
 
 ## Phase 1: DSLコア（v0.1相当） ✅
