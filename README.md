@@ -102,6 +102,38 @@ $ claude mcp add fixture-bank -- /path/to/fixture-bank mcp --db-url "$DATABASE_U
 }
 ```
 
+**GitHub Copilot CLI:**
+
+Add an entry to `~/.copilot/mcp-config.json` (create the file if it doesn't exist yet):
+
+```jsonc
+{
+  "mcpServers": {
+    "fixture-bank": {
+      "command": "/path/to/fixture-bank",
+      "args": ["mcp", "--db-url", "postgres://user:pass@localhost:5432/mydb", "--store-dir", "./fixtures"]
+    }
+  }
+}
+```
+
+Restart `copilot`, then confirm it's connected with `/mcp show`.
+
+**Gemini CLI:**
+
+Add an entry to `~/.gemini/settings.json` (global) or `.gemini/settings.json` (project-local):
+
+```jsonc
+{
+  "mcpServers": {
+    "fixture-bank": {
+      "command": "/path/to/fixture-bank",
+      "args": ["mcp", "--db-url", "postgres://user:pass@localhost:5432/mydb", "--store-dir", "./fixtures"]
+    }
+  }
+}
+```
+
 ### Available tools
 
 | Tool | What it does |
