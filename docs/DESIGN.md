@@ -138,5 +138,4 @@ k6等を置き換えるものではなく、その前段の「複雑な前提デ
 |---|---|
 | v0.1 | DSLパーサー + materialize(SQL/JSON) + PostgreSQL対応、README公開 |
 | v0.2 | MCPサーバー化（introspect_schema, draft_dsl, save_fixture） |
-| v0.3 | Zenn記事での実践例公開、利用者フィードバック収集 |
 | v1.0 | 複数DB対応の検討、relations多階層対応の検討 |
