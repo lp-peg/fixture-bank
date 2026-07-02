@@ -25,6 +25,17 @@ The key point is that **the LLM is only invoked in step 3, writing the DSL**. Wh
 
 `fixture-bank` addresses these by extracting the logic for generating prerequisite data into a DSL and turning it into a reusable asset. See [DESIGN.md](./docs/DESIGN.md) for the detailed design, and [MCP_TOOLS.md](./docs/MCP_TOOLS.md) for the MCP tool interface.
 
+## "Couldn't the agent just write a seed script?"
+
+Agents can write factory_bot or Python seed scripts directly, so what does a DSL buy you? Four things:
+
+- **Determinism**: A free-form script varies in its details (randomness, null rates, distributions) every time it's authored, which makes before/after load-test comparisons meaningless. The DSL restricts generation to deterministic generators — same DSL + same seed always yields the same data, guaranteed by the tool rather than by how carefully the script happened to be written.
+- **Tokens don't scale with record count**: The LLM authors a few dozen declarative lines once; `materialize` is an ordinary program. Previewing 1 record and inserting 100,000 cost the same zero additional LLM tokens — no write/run/debug loop over a growing script.
+- **Three-stage validation**: A script can only be validated by running it. A DSL has a fixed structure, so it's checked mechanically: syntax → schema integrity against the real database (`introspect_schema`) → a sandboxed trial insert (always rolled back) that catches real constraint violations. And since `materialize` only interprets the DSL, there's no arbitrary code execution — no surprise side effects against your database.
+- **Fixtures become reusable assets**: Seed scripts are one-offs tied to a language and a point-in-time schema. A tagged DSL (`save_fixture`) is short, diffable, replayable by anyone via `--fixture <tag>`, and stale fixtures are detected mechanically by re-running validation after schema changes.
+
+The full argument is in [DESIGN.md §3](./docs/DESIGN.md).
+
 ## Quick picture
 
 ```bash
