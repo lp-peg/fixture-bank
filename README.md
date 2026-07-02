@@ -53,10 +53,56 @@ $ ./fixture-bank materialize --dsl fixture.yaml --count 1000 --format sql --db-u
 # Save a fixture with a tag, then generate from the tag
 $ ./fixture-bank fixture save --dsl fixture.yaml --tag user:level50:has_premium_pass
 $ ./fixture-bank materialize --fixture user:level50:has_premium_pass --count 500 --format sql
+```
 
-# Start as an MCP server (stdio). See docs/MCP_TOOLS.md for the tool interface
+## Using fixture-bank as an MCP server
+
+`fixture-bank mcp` runs fixture-bank as an [MCP](https://modelcontextprotocol.io) server over stdio, so an agent (Claude Code, Claude Desktop, or any other MCP client) can investigate your schema and author/validate a DSL itself, instead of you writing the DSL by hand. This is what DESIGN.md calls the "author" side of the author/materialize split — the agent designs the generation logic once, and `materialize` reproduces it deterministically for any record count.
+
+```bash
 $ ./fixture-bank mcp --db-url "$DATABASE_URL" --store-dir ./fixtures
 ```
+
+Flags:
+
+| Flag | Default | Purpose |
+|---|---|---|
+| `--db-url` | (none) | PostgreSQL connection string. Required for `introspect_schema`, for `draft_dsl`'s schema/db_execution validation stages, and for `materialize`/`draft_dsl` when the DSL uses `pool_ref` or `unique: db`. If omitted, calls that need it return an `error_type: db_error` result rather than failing at startup |
+| `--store-dir` | `./fixtures` | Where `save_fixture` writes tagged DSL files |
+
+### Registering with an MCP client
+
+**Claude Code:**
+
+```bash
+$ claude mcp add fixture-bank -- /path/to/fixture-bank mcp --db-url "$DATABASE_URL" --store-dir ./fixtures
+```
+
+**Claude Desktop** (and other clients using the same `claude_desktop_config.json` style config):
+
+```jsonc
+{
+  "mcpServers": {
+    "fixture-bank": {
+      "command": "/path/to/fixture-bank",
+      "args": ["mcp", "--db-url", "postgres://user:pass@localhost:5432/mydb", "--store-dir", "./fixtures"]
+    }
+  }
+}
+```
+
+### Available tools
+
+| Tool | What it does |
+|---|---|
+| `introspect_schema` | Inspects tables/columns/constraints (PRIMARY KEY, UNIQUE, FOREIGN KEY) in the `public` schema, so an agent can learn the real shape of the database before writing a DSL |
+| `draft_dsl` | Validates a candidate DSL in the three stages from DSL_SPEC.md ¤5: syntax → schema integrity (against `introspect_schema`) → sandbox DB execution (a trial insert inside a transaction that is always rolled back, so no data is ever persisted). Returns `valid: true`, or `valid: false` plus which `stage` failed and why |
+| `materialize` | Generates records from a DSL as JSON or SQL, with optional `count`/`seed` overrides — the same engine the `materialize` CLI command uses |
+| `save_fixture` | Saves a DSL under a tag (e.g. `user:level50:has_premium_pass`) so it can be replayed later via `fixture-bank materialize --fixture <tag>` |
+
+A typical agent workflow: call `introspect_schema` to learn the tables, iterate on a DSL with `draft_dsl` until `valid: true`, then call `materialize` to preview a few JSON records, and `save_fixture` once it looks right.
+
+See **[docs/MCP_TOOLS.md](./docs/MCP_TOOLS.md)** for the full input/output schema and `error_type` reference for each tool.
 
 ## License
 
