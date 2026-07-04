@@ -36,6 +36,17 @@ Agents can write factory_bot or Python seed scripts directly, so what does a DSL
 
 The full argument is in [DESIGN.md §3](./docs/DESIGN.md).
 
+## How does this compare to other data-generation tools?
+
+None of these do exactly what fixture-bank does, but the neighborhood is crowded enough to be explicit about it:
+
+- **Seedfast** is the closest: an AI-powered CLI for PostgreSQL that reads your live schema and generates relationally-consistent test data from natural language each run, with an MCP server for Claude Code and similar clients. The agent × schema-introspection × Postgres × MCP shape overlaps heavily with fixture-bank. The real difference is architectural: Seedfast uses the LLM as the generator on every invocation, and by its own account optimizes for data that "looks realistic" over byte-identical reproducibility. fixture-bank's DSL exists to reject that tradeoff — the LLM authors a DSL once, and `materialize` reproduces it deterministically afterward with no further LLM involvement.
+- **Tonic Fabricate** (commercial) generates synthetic data through an AI agent and chat UI, is usable from MCP clients, and explicitly names load testing as a use case. It's the best-funded adjacent tool, but it's built around enterprise test-data-management broadly rather than a small, git-committable, reviewable DSL artifact.
+- **Snaplet Seed** (now maintained as `supabase-community/seed`) shared the determinism instinct via its Copycat generator, but the company behind it shut down in 2024 and it's effectively in maintenance mode — a TypeScript client rather than a DSL, and it predates MCP.
+- **Synth** is open-source prior art for "declarative, git-reviewable data model, constraint-based, scales to millions of rows" — roughly half of fixture-bank's DSL argument — but development has stalled, and it has no agent integration or pre-execution DB validation.
+
+Every individual ingredient here (a declarative DSL, deterministic generation, MCP, schema introspection) has prior art somewhere. fixture-bank's claim is the combination: the LLM only authors the DSL, generation is validated in three stages before anything touches real data (see below), and the explicit job is load-test prerequisite data, including "aged state" scenarios. The sandboxed trial-insert validation stage in particular doesn't appear to exist in any of the tools above.
+
 ## Quick picture
 
 ```bash
